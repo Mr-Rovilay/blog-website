@@ -9,10 +9,16 @@ import jwt from "jsonwebtoken";
 import admin from "firebase-admin";
 import serviceAccountKey from "./chelsea-blog-6c370-firebase-adminsdk-a101g-a38a1b47d0.json" assert { type: "json" };
 import { getAuth } from "firebase-admin/auth";
+import aws from "aws-sdk";
 
 const server = express();
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccountKey),
+});
+
+server.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  next();
 });
 
 dotenv.config();
@@ -20,7 +26,7 @@ dotenv.config();
 let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; // regex for email
 let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
 
-server.use(cors("Access-Control-Allow-Origin"));
+server.use(cors());
 server.use(express.urlencoded({ extended: true }));
 server.use(express.json({ limit: "50mb" }));
 
@@ -46,6 +52,33 @@ const generateUsername = async (email) => {
   isUsernameNotUnique ? (username += nanoid().substring(0, 5)) : "";
   return username;
 };
+
+const s3 = new aws.S3({
+  region: "eu-north-1",
+  accessKeyId: process.env.AWS_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+});
+
+const generateUploadURL = async () => {
+  const date = new Date();
+  const imageName = `${nanoid()}-${date.getTime()}.jpeg`;
+
+  return await s3.getSignedUrlPromise("putObject", {
+    Bucket: "chelseablog",
+    Key: imageName, // Corrected Key to start with a capital 'K'
+    Expires: 1000,
+    ContentType: "image/jpeg",
+  });
+};
+
+server.get("/get-upload-url", (req, res) => {
+  generateUploadURL()
+    .then((url) => res.status(200).json({ uploadURL: url }))
+    .catch((err) => {
+      console.log(err.message);
+      return res.status(500).json({ err: err.message });
+    });
+});
 
 server.post("/signup", (req, res) => {
   let { fullname, email, password } = req.body;
