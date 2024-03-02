@@ -7,6 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 .env
+chelsea-blog-6c370-firebase-adminsdk-a101g-a38a1b47d0.json
 
 node_modules
 dist
