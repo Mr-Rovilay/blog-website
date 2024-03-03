@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import bcrypt from "bcrypt";
 import User from "./Schema/User.js";
+import Blog from "./Schema/Blog.js";
 import { nanoid } from "nanoid";
 import jwt from "jsonwebtoken";
 import admin from "firebase-admin";
@@ -30,6 +31,20 @@ server.use(cors());
 server.use(express.urlencoded({ extended: true }));
 server.use(express.json({ limit: "50mb" }));
 
+const verifyJWT = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (token == null) {
+    return res.status(401).json({ error: "No access token" });
+  }
+  jwt.verify(token, process.env.SECRET_ACCESS_KEY, (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: "Access token is invalid" });
+    }
+    req.user = user.id;
+    next();
+  });
+};
 const formatDataToSend = (user) => {
   const access_token = jwt.sign(
     { id: user._id },
@@ -65,7 +80,7 @@ const generateUploadURL = async () => {
 
   return await s3.getSignedUrlPromise("putObject", {
     Bucket: "chelseablog",
-    Key: imageName, // Corrected Key to start with a capital 'K'
+    Key: imageName,
     Expires: 1000,
     ContentType: "image/jpeg",
   });
@@ -82,7 +97,7 @@ server.get("/get-upload-url", (req, res) => {
 
 server.post("/signup", (req, res) => {
   let { fullname, email, password } = req.body;
-  if (fullname.lengh < 3) {
+  if (fullname.length < 3) {
     return res
       .status(403)
       .json({ error: "Fullname must be at least 3 characters long" });
@@ -137,7 +152,7 @@ server.post("/signin", (req, res) => {
         bcrypt.compare(password, user.personal_info.password, (err, result) => {
           if (err) {
             return res.status(403).json({
-              error: "Error occure while login in please try again",
+              error: "Error occur while login in please try again",
             });
           }
 
@@ -209,6 +224,95 @@ server.post("/google-auth", async (req, res) => {
         error:
           "Failed to authenticate you with google. Try with another google account",
       });
+    });
+});
+
+server.post("/create-blog", verifyJWT, (req, res) => {
+  let authorId = req.user;
+  let { title, des, banner, content, tags, draft } = req.body;
+
+  if (!title) {
+    return res
+      .status(403)
+      .json({ error: "You must provide a title to publish the blog" });
+  }
+
+  if (!draft) {
+    if (!des || des.length > 200) {
+      return res.status(403).json({
+        error: "You must provide a blog description under 200 characters",
+      });
+    }
+
+    if (!banner) {
+      return res
+        .status(403)
+        .json({ error: "You must provide a blog banner to publish it" });
+    }
+
+    if (
+      !content ||
+      !Array.isArray(content.blocks) ||
+      content.blocks.length === 0
+    ) {
+      return res
+        .status(403)
+        .json({ error: "There must be some blog content to publish it" });
+    }
+
+    if (
+      !tags ||
+      !Array.isArray(tags) ||
+      tags.length === 0 ||
+      tags.length > 10
+    ) {
+      return res.status(403).json({
+        error: "Provide tags in order to publish the blog, maximum 10",
+      });
+    }
+  }
+
+  tags = tags.map((tag) => tag.toLowerCase());
+
+  let blog_id =
+    title
+      .replace(/[^a-zA-Z0-9]/g, " ")
+      .replace(/\s+/g, "-")
+      .trim() + nanoid();
+
+  let blog = new Blog({
+    title,
+    des,
+    banner,
+    content,
+    tags,
+    author: authorId,
+    blog_id,
+    draft: Boolean(draft),
+  });
+
+  blog
+    .save()
+    .then((blog) => {
+      let incrementVal = draft ? 0 : 1;
+      User.findOneAndUpdate(
+        { _id: authorId },
+        {
+          $inc: { "account_info.total_posts": incrementVal },
+          $push: { blogs: blog._id },
+        }
+      )
+        .then((user) => {
+          return res.status(200).json({ id: blog.blog_id });
+        })
+        .catch((err) => {
+          return res
+            .status(500)
+            .json({ error: "Failed to update total posts" });
+        });
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.message });
     });
 });
 
