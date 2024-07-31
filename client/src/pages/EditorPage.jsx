@@ -7,7 +7,7 @@ import PublishForm from "../components/PublishForm";
 const blogStructure = {
   title: "",
   banner: "",
-  conent: [],
+  content: [],
   tags: [],
   des: "",
   author: { personal_info: {} },
@@ -18,7 +18,7 @@ export const EditorContent = createContext({});
 const EditorPage = () => {
   const [blog, setBlog] = useState(blogStructure);
   const [editorState, setEditorState] = useState("editor");
-  const [textEditor, setTextEditor] = useState({ isRready: false });
+  const [textEditor, setTextEditor] = useState({ isReady: false });
   let {
     userAuth: { access_token },
   } = useContext(UserContext);

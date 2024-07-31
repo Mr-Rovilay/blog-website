@@ -25,7 +25,7 @@ const Navbar = () => {
     <>
       <nav className="navbar flex items-center justify-between">
         <Link to="/" className="flex-none w-10">
-          <img src={logo} alt="" srcset="" />
+          <img src={logo} alt="" srcSet="" />
         </Link>
 
         <div
