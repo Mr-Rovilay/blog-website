@@ -21,10 +21,6 @@ const [pageState, setPageState] = useState("home");
     }
   };
 
-  useEffect(() => {
-    fetchLatestBlog();
-  }, []);
-
   const fetchTrendingBlog = async () => {
     try {
       const response = await axios.get(import.meta.env.VITE_SERVER_DOMAIN + "/trending-blogs");
@@ -36,6 +32,7 @@ const [pageState, setPageState] = useState("home");
 
   useEffect(() => {
     fetchTrendingBlog();
+    fetchLatestBlog();
   }, []);
 
   const loadBlogByCategory = async (e) => {
