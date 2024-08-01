@@ -25,7 +25,7 @@ const Navbar = () => {
     <>
       <nav className="navbar flex items-center justify-between">
         <Link to="/" className="flex-none w-10">
-          <img src={logo} alt="" srcSet="" />
+          <img src="/Chelsea_FC.svg" alt="" srcSet="" />
         </Link>
 
         <div
@@ -37,7 +37,7 @@ const Navbar = () => {
           <input
             type="text"
             placeholder="Search..."
-            className="w-full md:w-auto bg-grey p-4 pl-6 pr-[12%] md:pr-6 rounded-full placeholder:text-dark-grey md:pl-12"
+            className="w-full md:w-auto bg-grey p-4 pl-6 pr-[12%] md:pr-6 rounded-full placeholder:text-dark-grey md:pl-12 border border-[#0000FF]"
           />
           <i className="fi fi-br-search absolute right-[10%] md:pointer-events-none md:left-5 top-1/2 -translate-y-1/2 text-xl text-dark-grey"></i>
         </div>

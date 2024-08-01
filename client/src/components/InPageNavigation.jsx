@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 import { useRef, useState } from "react";
 
+
+export let activeTabLine
+export let activeTab
 const InPageNavigation = ({
   routes,
   defaultHidden = [],

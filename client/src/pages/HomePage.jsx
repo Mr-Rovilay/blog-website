@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import AnimationWrapper from "../common/AnimationWrapper";
-import InPageNavigation from "../components/InPageNavigation";
+import InPageNavigation, { activeTab } from "../components/InPageNavigation";
 import axios from "axios";
 import Loader from "../components/Loader";
 import BlogPost from "../components/BlogPost";
@@ -31,9 +31,14 @@ const [pageState, setPageState] = useState("home");
   };
 
   useEffect(() => {
-    fetchTrendingBlog();
-    fetchLatestBlog();
-  }, []);
+    activeTab.current.click()
+    if (pageState === "home") {
+      fetchTrendingBlog();
+    }
+    if(!trendingBlogs){
+      fetchLatestBlog();
+    }
+  }, [pageState]);
 
   const loadBlogByCategory = async (e) => {
     const category = e.target.innerText.toLowerCase()
@@ -76,7 +81,7 @@ const [pageState, setPageState] = useState("home");
           )}
       </InPageNavigation> 
         </div>
-        <div className="min-w-[40%] lg:min-w-[400px] max-w-min border-l border-grey pl-8 pt-3 max-md:hidden">
+        <div className="min-w-[40%] lg:min-w-[400px] max-w-min border-l border-[#0000FF] pl-8 pt-3 max-md:hidden">
           <div className="flex flex-col gap-10">
             <div className="">
             <h1 className="font-medium text-xl mb-8">Stories from all interests</h1>
