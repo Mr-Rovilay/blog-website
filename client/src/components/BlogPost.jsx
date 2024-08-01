@@ -20,7 +20,7 @@ const BlogPost = ({content, author}) => {
       </div>
     </div>
     <div className="h-28 aspect-square bg-grey">
-      <img src={banner} alt="" className="w-full h-full aspect-square object-cover"/>
+      <img src={banner} alt="" className="w-full h-full aspect-square object-cover rounded-md"/>
     </div>
     </Link>
   )

@@ -1,5 +1,5 @@
 import express from "express";
-import "./db/db.js";
+import connectDB from "./db/db.js";
 import dotenv from "dotenv";
 import cors from "cors";
 import bcrypt from "bcrypt";
@@ -329,11 +329,26 @@ server.post("/create-blog", verifyJWT, (req, res) => {
       return res.status(500).json({ error: err.message });
     });
 });
+server.get("/trending-blogs", (req, res) => {
+  Blog.find({ draft: false })
+  .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
+  .sort({ 'activity.total_read' : -1, 'activity.total_likes' : -1, 'activity.total_comments' : -1 , 'publishedAt' : -1 })
+  .select('blog_id title publishedAt -_id')
+  .limit(5)
+  .then(blogs => {
+    return res.status(200).json({ blogs: blogs });
+  }).catch(err => {
+    return res.status(500).json({err: err.message });
+  })
+})
 
 server.get("/", (req, res) => {
   res.send("OK...my message");
 });
 
-server.listen(process.env.PORT, () =>
-  console.log("server listening on port " + process.env.PORT)
-);
+connectDB().then(() => {
+  const PORT = process.env.PORT || 5000;
+  server.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
+  });
+});
