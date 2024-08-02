@@ -255,16 +255,21 @@ server.post("/all-latest-blogs-count", (req, res) => {
     });
 })
 server.post("/search-blogs-count", (req, res) => {
-  let tag = req.body
-  let findQuery = {tags: tag, draft: false};
+  const { tag } = req.body;
+
+  // Ensure tag is a string and trim it to avoid unnecessary whitespace
+  const sanitizedTag = tag?.trim();
+
+  // Define the query for counting documents
+  const findQuery = { draft: false };
+  if (sanitizedTag) {
+    findQuery.tags = sanitizedTag;
+  }
+
   Blog.countDocuments(findQuery)
-  .then(count => {
-    return res.status(200).json({ totalDocs: count });
-  })
-  .catch(err => {
-    return res.status(500).json({ error: err.message });
-  })
-})
+    .then(count => res.status(200).json({ totalDocs: count }))
+    .catch(err => res.status(500).json({ error: err.message }));
+});
 
 server.post("/create-blog", verifyJWT, (req, res) => {
   let authorId = req.user;
@@ -355,22 +360,37 @@ server.post("/create-blog", verifyJWT, (req, res) => {
     });
 });
 
-server.post("/search-blogs",(req, res) => {
-  let {tag, page} = req.body
-  let findQuery = {tags:tag,draft: false}
-  let maxLimit  = 2
+server.post("/search-blogs", (req, res) => {
+  let { tag, query, page = 1 } = req.body;
+
+  // Validate and sanitize inputs
+  tag = tag?.trim();
+  query = query?.trim();
+
+  let findQuery = { draft: false }; // Base query
+
+  if (tag) {
+    findQuery.tags = tag;
+  } else if (query) {
+    findQuery.title = new RegExp(query, 'i');
+  }
+
+  const maxLimit = 2;
+
   Blog.find(findQuery)
-  .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
-  .sort({ 'publishedAt': -1 })
-  .select('blog_id title des banner activity tags publishedAt -_id')
-  .skip((page - 1) * maxLimit)
-  .limit(maxLimit)
-  .then(blogs => {
-    return res.status(200).json({ blogs: blogs });
-  }).catch(err => {
-    return res.status(500).json({err: err.message });
-  })
-})
+    .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
+    .sort({ publishedAt: -1 })
+    .select('blog_id title des banner activity tags publishedAt -_id')
+    .skip((page - 1) * maxLimit)
+    .limit(maxLimit)
+    .then(blogs => {
+      res.status(200).json({ blogs });
+    })
+    .catch(err => {
+      res.status(500).json({ err: err.message });
+    });
+});
+
 
 server.get("/trending-blogs", (req, res) => {
   Blog.find({ draft: false })

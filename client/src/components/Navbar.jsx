@@ -22,10 +22,9 @@ const Navbar = () => {
     }, 200);
   };
   const handleSearch = (e) => {  
-    console.log(e) 
     let query = e.target.value;
     if (e.keyCode === 13 && query.length) {
-      navigate(`/search?q=${query}`);
+      navigate(`/search/${query}`);
     }
    }
   return (

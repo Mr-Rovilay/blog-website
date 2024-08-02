@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar";
 import EditorPage from "./pages/EditorPage";
 import UserAuthForm from "./pages/UserAuthForm";
 import HomePage from "./pages/HomePage";
+import SearchPage from "./pages/SearchPage";
 
 export const UserContext = createContext({});
 
@@ -23,8 +24,9 @@ const App = () => {
         <Route path="/editor" element={<EditorPage />} />
         <Route path="/" element={<Navbar />}>
           <Route index element={<HomePage />} />
-          <Route path="/signin" element={<UserAuthForm type="sign-in" />} />
-          <Route path="/signup" element={<UserAuthForm type="sign-up" />} />
+          <Route path="signin" element={<UserAuthForm type="sign-in" />} />
+          <Route path="signup" element={<UserAuthForm type="sign-up" />} />
+          <Route path="search/:query" element={<SearchPage/>}/>
         </Route>
       </Routes>
     </UserContext.Provider>
