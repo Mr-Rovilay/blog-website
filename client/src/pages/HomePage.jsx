@@ -119,7 +119,7 @@ const HomePage = () => {
               ) : (
                 <NoData message={"No blog Published"} />
               )}
-              <LoadMoreData state={blogs} fetchDataFun={fetchLatestBlog} />
+                <LoadMoreData state={blogs} fetchDataFun={(pageState === "home" ? fetchLatestBlog : fetchBlogCategory)} />
             </>
             <>
               {trendingBlogs.length === 0 ? (
