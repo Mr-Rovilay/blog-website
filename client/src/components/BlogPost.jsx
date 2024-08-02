@@ -5,7 +5,7 @@ const BlogPost = ({content, author}) => {
   let {publishedAt, tags, title, des, banner, activity: {total_likes}, blog_id: id}  = content;
   let {fullname, profile_img, username} = author;
   return (
-    <Link to={`/blog/${id}`} className="flex gap-8 items-center border-b border-[#0000FF] pb-5 mb-4">
+    <Link to={`/blog/${id}`} className="flex gap-8 items-center border-b border-grey pb-5 mb-4">
     <div className="w-full">
       <div className="flex gap-2 items-center mb-7">
       <img src={profile_img} alt="" className="w-6 h-6 rounded-full"/>

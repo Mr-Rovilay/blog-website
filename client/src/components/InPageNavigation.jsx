@@ -10,8 +10,8 @@ const InPageNavigation = ({
   defaultActiveIndex = 0,
   children
 }) => {
-  let activeTabLine = useRef();
-  let activeTab = useRef();
+  activeTabLine = useRef();
+  activeTab = useRef();
   let [InPageNavigation, setInPageNavigation] = useState(defaultActiveIndex);
   const changePageState = (btn, i) => {
     let { offsetWidth, offsetLeft } = btn;
