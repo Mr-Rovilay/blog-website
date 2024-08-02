@@ -254,22 +254,7 @@ server.post("/all-latest-blogs-count", (req, res) => {
       return res.status(500).json({ error: err.message });
     });
 })
-server.post("/search-blogs-count", (req, res) => {
-  const { tag } = req.body;
 
-  // Ensure tag is a string and trim it to avoid unnecessary whitespace
-  const sanitizedTag = tag?.trim();
-
-  // Define the query for counting documents
-  const findQuery = { draft: false };
-  if (sanitizedTag) {
-    findQuery.tags = sanitizedTag;
-  }
-
-  Blog.countDocuments(findQuery)
-    .then(count => res.status(200).json({ totalDocs: count }))
-    .catch(err => res.status(500).json({ error: err.message }));
-});
 
 server.post("/create-blog", verifyJWT, (req, res) => {
   let authorId = req.user;
@@ -359,15 +344,36 @@ server.post("/create-blog", verifyJWT, (req, res) => {
       return res.status(500).json({ error: err.message });
     });
 });
+server.post("/search-blogs-count", (req, res) => {
+  const { tag, query } = req.body;
+
+  // Ensure tag is a string and trim it to avoid unnecessary whitespace
+  const sanitizedTag = tag?.trim();
+
+  // Define the base query for counting documents
+  let findQuery = { draft: false };
+
+  if (sanitizedTag) {
+    findQuery.tags = sanitizedTag;
+  } else if (query) {
+    findQuery.title = new RegExp(query, 'i');
+  }
+
+  Blog.countDocuments(findQuery)
+    .then(count => res.status(200).json({ totalDocs: count }))
+    .catch(err => res.status(500).json({ error: err.message }));
+});
+
+
+
 
 server.post("/search-blogs", (req, res) => {
   let { tag, query, page = 1 } = req.body;
 
-  // Validate and sanitize inputs
   tag = tag?.trim();
   query = query?.trim();
 
-  let findQuery = { draft: false }; // Base query
+  let findQuery = { draft: false };
 
   if (tag) {
     findQuery.tags = tag;

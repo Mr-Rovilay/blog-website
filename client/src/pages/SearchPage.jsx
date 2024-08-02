@@ -7,6 +7,7 @@ import BlogPost from "../components/BlogPost";
 import NoData from "../components/NoData";
 import axios from "axios";
 import { filterPaginationData } from "../common/filter-pagination-data";
+import LoadMoreData from "../components/LoadMoreData";
 
 const SearchPage = () => {
   let { query } = useParams();
@@ -54,9 +55,15 @@ const SearchPage = () => {
   const debouncedSearchBlogs = debounce(searchBlogs, 300);
 
   useEffect(() => {
-    debouncedSearchBlogs({ page: 1 });
+    resetState()
+    debouncedSearchBlogs({ page: 1, create_new_arr: true });
   }, [query]); // Re-run the effect if query changes
 
+  const resetState = () => {
+    setBlogs(null);
+    setLoading(false);
+    setError(null);
+  }
   return (
     <section className="h-cover flex justify-center gap-10">
       <div className="w-full">
@@ -81,7 +88,7 @@ const SearchPage = () => {
             ) : (
               <NoData message={"No blog Published"} />
             )}
-            {/* <LoadMoreData state={blogs} fetchDataFun={searchBlogs} /> */}
+            <LoadMoreData state={blogs} fetchDataFun={searchBlogs} />
           </>
         </InPageNavigation>
       </div>
