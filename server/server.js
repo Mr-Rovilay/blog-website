@@ -345,7 +345,7 @@ server.post("/create-blog", verifyJWT, (req, res) => {
     });
 });
 server.post("/search-blogs-count", (req, res) => {
-  const { tag, query } = req.body;
+  const { tag, author, query } = req.body;
 
   // Ensure tag is a string and trim it to avoid unnecessary whitespace
   const sanitizedTag = tag?.trim();
@@ -357,6 +357,8 @@ server.post("/search-blogs-count", (req, res) => {
     findQuery.tags = sanitizedTag;
   } else if (query) {
     findQuery.title = new RegExp(query, 'i');
+  } else if (author) {
+    findQuery = {author, draft: false  };
   }
 
   Blog.countDocuments(findQuery)
@@ -403,6 +405,8 @@ server.post("/search-blogs", (req, res) => {
     findQuery.tags = tag;
   } else if (query) {
     findQuery.title = new RegExp(query, 'i');
+  } else if (author) {
+    findQuery = {author, draft: false  };
   }
 
   const maxLimit = 2;

@@ -5,6 +5,7 @@ import AnimationWrapper from "../common/AnimationWrapper"
 import Loader from "../components/Loader"
 import { UserContext } from "../App"
 import AboutUser from "../components/AboutUser"
+import { filterPaginationData } from "../common/filter-pagination-data"
 
 export const profileDataStructure = {
     personal_info: {
@@ -27,6 +28,7 @@ const ProfilePage = () => {
     const {id: profileId} = useParams()
     const [loading, setLoading] = useState(true)
     const [profile, setProfile] = useState(profileDataStructure)
+    const [blogs, setBlogs] = useState(null)
     const {personal_info: {fullname, username: profile_username, profile_img, bio}, account_info:{total_reads, total_posts}, social_links, joinedAt} = profile
     const {userAuth:{ username } } = useContext(UserContext) 
     console.log(username, profileId)
@@ -35,6 +37,8 @@ const ProfilePage = () => {
             username: profileId 
         }).then(({data: user}) => {
             setProfile(user)
+
+            getBlogs({user_id: user._id})
             setLoading(false)
         }).catch(error => {
             console.error(error)
@@ -45,6 +49,22 @@ const ProfilePage = () => {
         resetState();  // Reset state before a new request
         fetchUserProfile();
     }, [profileId])
+
+    const getBlogs = async ({page  = 1, user_id}) => {
+        user_id = user_id === undefined ? blogs.user_id : user_id;
+        axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/search-blogs", { author: user_id, page })
+        .then( async ({data}) => {  
+            let formatedData = await filterPaginationData({
+                state: blogs,
+                data: data.blogs,
+                page,
+                countRoute: "/search-blogs-count",
+                data_to_send: { author: user_id }   
+            })
+            formatedData.user_id = user_id;
+            setBlogs(formatedData); 
+         })
+    }
 
     const resetState = () => {
         setProfile(profileDataStructure)
@@ -70,6 +90,7 @@ const ProfilePage = () => {
                     </div>
                     <AboutUser className="max-md:hidden" bio={bio} social_links={social_links} joinedAt={joinedAt}/>
                 </div>
+                <div className=""></div>
             </section>
         }
 
