@@ -105,7 +105,7 @@ const HomePage = () => {
             defaultHidden={["trending blog"]}
           >
             <>
-              {blogs.results.length === 0 ? (
+              {blogs === null ? (
                 <Loader />
               ) : blogs.results.length ? (
                 blogs.results.map((blog, i) => (
@@ -122,7 +122,7 @@ const HomePage = () => {
                 <LoadMoreData state={blogs} fetchDataFun={(pageState === "home" ? fetchLatestBlog : fetchBlogCategory)} />
             </>
             <>
-              {trendingBlogs.length === 0 ? (
+              {trendingBlogs === null ? (
                 <Loader />
               ) : trendingBlogs.length ? (
                 trendingBlogs.map((blog, i) => (

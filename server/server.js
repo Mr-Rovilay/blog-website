@@ -394,7 +394,7 @@ server.post("/get-profile", (req, res)=> {
 
 
 server.post("/search-blogs", (req, res) => {
-  let { tag, query, page = 1 } = req.body;
+  let { tag, query,author, page = 1 } = req.body;
 
   tag = tag?.trim();
   query = query?.trim();
